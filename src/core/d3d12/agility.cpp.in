@@ -1,0 +1,4 @@
+#include <cstdint>
+
+extern "C" __declspec(dllexport) const uint32_t D3D12SDKVersion = @CORE_D3D12_AGILITY_SDK_VERSION@;
+extern "C" __declspec(dllexport) extern const char* D3D12SDKPath = "@CORE_D3D12_AGILITY_SDK_DLL_PATH@";
