@@ -36,5 +36,14 @@ core_download_and_extract_zip(
 add_library(
     ${CORE_LIBRARY_NAME}
 )
+target_include_directories(
+    ${CORE_LIBRARY_NAME} PUBLIC
+    src/core
+    thirdparty/d3d12_agility_sdk/build/native/include
+)
+set_target_properties(
+    ${CORE_LIBRARY_NAME} PROPERTIES
+    CXX_STANDARD 23
+)
 
 add_subdirectory(src)
