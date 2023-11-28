@@ -109,6 +109,7 @@ HRESULT create_d3d12_context(D3D12_Context_Create_Info* create_info, D3D12_Conte
     {
         return result;
     }
+    return S_OK;
 }
 
 HRESULT destroy_d3d12_context(D3D12_Context* context)
