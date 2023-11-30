@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 set(CORE_LIBRARY_NAME core_lib)
-
-option(CORE_LIBRARY_COMPILE_D3D12 ON)
+set(CORE_SF_LIBRARY_NAME core_sample_framework)
 
 include(${CMAKE_CURRENT_LIST_DIR}/scripts/core.cmake)
 
@@ -43,6 +42,22 @@ target_include_directories(
 )
 set_target_properties(
     ${CORE_LIBRARY_NAME} PROPERTIES
+    CXX_STANDARD 23
+)
+
+add_library(
+    ${CORE_SF_LIBRARY_NAME}
+)
+target_link_libraries(
+    ${CORE_SF_LIBRARY_NAME} PUBLIC
+    ${CORE_LIBRARY_NAME}
+)
+target_include_directories(
+    ${CORE_SF_LIBRARY_NAME} PUBLIC
+    src/core_sample_framework
+)
+set_target_properties(
+    ${CORE_SF_LIBRARY_NAME} PROPERTIES
     CXX_STANDARD 23
 )
 
