@@ -149,7 +149,7 @@ DWORD await_queue(ID3D12Device* device, ID3D12CommandQueue* queue, uint64_t time
     device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
     if (!fence)
     {
-        return;
+        return WAIT_FAILED;
     }
     queue->Signal(fence, 1);
     auto result = await_fence(fence, 1, timeout);
