@@ -35,7 +35,7 @@ public:
     [[nodiscard]] const Window_Data& get_data() const noexcept { return m_data; }
 
 protected:
-    Window_Data m_data;
+    Window_Data m_data = {};
 };
 
 }

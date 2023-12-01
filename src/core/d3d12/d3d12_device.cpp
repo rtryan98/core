@@ -6,7 +6,7 @@ HRESULT create_d3d12_command_queue(
     ID3D12Device* device,
     D3D12_COMMAND_LIST_TYPE type,
     bool disable_tdr,
-    ID3D12CommandQueue* queue)
+    ID3D12CommandQueue** queue)
 {
     D3D12_COMMAND_QUEUE_DESC desc = {
         .Type = type,
@@ -16,7 +16,7 @@ HRESULT create_d3d12_command_queue(
             : D3D12_COMMAND_QUEUE_FLAG_NONE,
         .NodeMask = 0
     };
-    return device->CreateCommandQueue(&desc, IID_PPV_ARGS(&queue));
+    return device->CreateCommandQueue(&desc, IID_PPV_ARGS(queue));
 }
 
 void get_d3d12_features(D3D12_Context* context)
@@ -94,17 +94,17 @@ HRESULT create_d3d12_context(const D3D12_Context_Create_Info& create_info, D3D12
         return result;
     }
     get_d3d12_features(context);
-    result = create_d3d12_command_queue(context->device, D3D12_COMMAND_LIST_TYPE_DIRECT, create_info.disable_tdr, context->direct_queue);
+    result = create_d3d12_command_queue(context->device, D3D12_COMMAND_LIST_TYPE_DIRECT, create_info.disable_tdr, &context->direct_queue);
     if (FAILED(result))
     {
         return result;
     }
-    result = create_d3d12_command_queue(context->device, D3D12_COMMAND_LIST_TYPE_COMPUTE, create_info.disable_tdr, context->compute_queue);
+    result = create_d3d12_command_queue(context->device, D3D12_COMMAND_LIST_TYPE_COMPUTE, create_info.disable_tdr, &context->compute_queue);
     if (FAILED(result))
     {
         return result;
     }
-    result = create_d3d12_command_queue(context->device, D3D12_COMMAND_LIST_TYPE_COPY, create_info.disable_tdr, context->copy_queue);
+    result = create_d3d12_command_queue(context->device, D3D12_COMMAND_LIST_TYPE_COPY, create_info.disable_tdr, &context->copy_queue);
     if (FAILED(result))
     {
         return result;

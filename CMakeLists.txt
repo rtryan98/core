@@ -35,6 +35,11 @@ core_download_and_extract_zip(
 add_library(
     ${CORE_LIBRARY_NAME}
 )
+target_link_libraries(
+    ${CORE_LIBRARY_NAME} PUBLIC
+    d3d12.lib
+    dxgi.lib
+)
 target_include_directories(
     ${CORE_LIBRARY_NAME} PUBLIC
     src/core

@@ -17,6 +17,7 @@ Sample_Application::Sample_Application(const Sample_Application_Create_Info& cre
 
 Sample_Application::~Sample_Application()
 {
+    d3d12::await_context(&m_d3d12_context);
     d3d12::destroy_d3d12_context(&m_d3d12_context);
 }
 
@@ -25,7 +26,7 @@ void Sample_Application::run()
     m_running = true;
     auto current_time = std::chrono::system_clock::now();
     auto last_time = current_time;
-    while (m_running)
+    while (m_window->get_data().is_alive)
     {
         using Duration = std::chrono::duration<double>;
         auto delta_time = std::chrono::duration_cast<Duration>(current_time - last_time).count();
