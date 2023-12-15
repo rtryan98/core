@@ -1,2 +1,2 @@
 # core
-(Co)mmon (Re)ndering Library.
+(Co)mmon (Re)ndering Library and Sample Framework.
