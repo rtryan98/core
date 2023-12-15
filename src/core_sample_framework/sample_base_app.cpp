@@ -32,7 +32,12 @@ void Sample_Application::run()
     while (m_window->get_data().is_alive)
     {
         m_window->poll_events();
-        m_swapchain->resize_if_size_changed();
+        auto resize_result = m_swapchain->resize_if_size_changed();
+        if (resize_result.is_resized)
+        {
+            // resize
+        }
+        auto swapchain_data = m_swapchain->get_next_buffer();
 
         using Duration = std::chrono::duration<double>;
         auto delta_time = std::chrono::duration_cast<Duration>(current_time - last_time).count();
@@ -43,6 +48,8 @@ void Sample_Application::run()
         ID3D12GraphicsCommandList9* cmd = nullptr;
         render(cmd, delta_time);
         render_gui(cmd);
+
+        m_swapchain->present();
 
         last_time = current_time;
         current_time = std::chrono::system_clock::now();
