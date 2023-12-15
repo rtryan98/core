@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <d3d12.h>
 #include <dxgi1_6.h>
+#include <span>
 
 namespace core::d3d12
 {
@@ -54,6 +55,11 @@ struct D3D12_Context_Create_Info
     bool enable_gpu_validation;
     bool disable_tdr;
     D3D_FEATURE_LEVEL feature_level;
+    uint32_t resource_descriptor_heap_size;
+    uint32_t sampler_descriptor_heap_size;
+    uint32_t rtv_descriptor_heap_size;
+    uint32_t dsv_descriptor_heap_size;
+    std::span<D3D12_STATIC_SAMPLER_DESC> static_samplers;
 };
 
 struct D3D12_Context
@@ -65,6 +71,11 @@ struct D3D12_Context
     ID3D12CommandQueue* compute_queue;
     ID3D12CommandQueue* copy_queue;
     D3D12_Features features;
+    ID3D12DescriptorHeap* resource_descriptor_heap;
+    ID3D12DescriptorHeap* sampler_descriptor_heap;
+    ID3D12DescriptorHeap* rtv_descriptor_heap;
+    ID3D12DescriptorHeap* dsv_descriptor_heap;
+    ID3D12RootSignature* bindless_root_signature;
 };
 
 HRESULT create_d3d12_context(const D3D12_Context_Create_Info& create_info, D3D12_Context* context);
