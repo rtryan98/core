@@ -15,18 +15,29 @@ struct Handle_Specification
     constexpr static uint32_t FLAG_SIZE = Flag_Size;
 };
 
+template<template<Handle_Specification> class Handle_Type, Handle_Specification Specification>
+concept Handle_Concept = requires(Handle_Type<Specification> handle)
+{
+    handle.index;
+    handle.generation;
+    handle.flags;
+};
+
+/*
 template<Handle_Specification Specification>
-struct Handle
+struct Default_Handle
 {
     uint32_t index;
     uint32_t generation : Specification::GENERATION_SIZE;
     uint32_t flags : Specification::FLAG_SIZE;
 };
+*/
 
-template<Handle_Specification Specification, Handle<Specification> Handle_Type, class Data>
+template<template<Handle_Specification> class Handle_Concept, Handle_Specification Specification, class Data>
 class Handle_Allocator
 {
     static_assert(std::is_standard_layout_v<Data>);
+    using Handle_Type = Handle_Concept<Handle_Specification>;
 
     constexpr static uint32_t NO_HEAD = ~0u;
 
