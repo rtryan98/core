@@ -88,7 +88,8 @@ void Swapchain::present(bool vsync, uint32_t sync_interval)
         .pScrollRect = nullptr,
         .pScrollOffset = nullptr
     };
-    m_swapchain->Present1(sync_interval, vsync ? desc.Flags & DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : false, &present_parameters);
+    bool tear = vsync ? 0 : (desc.Flags & DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING) != 0;
+    m_swapchain->Present1(sync_interval, tear ? DXGI_PRESENT_ALLOW_TEARING : 0, &present_parameters);
 }
 
 void Swapchain::reset_buffers()
