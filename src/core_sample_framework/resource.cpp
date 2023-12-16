@@ -38,7 +38,13 @@ Resource_Manager::~Resource_Manager()
     {
         if (!buffer.alive)
             continue;
-        // destroy buffer
+        destroy_gpu_resource(buffer.resource, buffer.allocation);
+    }
+    for (auto& texture : m_textures)
+    {
+        if (!texture.alive)
+            continue;
+        destroy_gpu_resource(texture.resource, texture.allocation);
     }
     m_allocator->Release();
 }
@@ -47,6 +53,8 @@ Buffer* Resource_Manager::create_buffer(const Buffer_Create_Info & create_info) 
 {
     auto* buffer =  &m_buffers.emplace_back();
     buffer->alive = true;
+    buffer->size = create_info.size;
+    buffer->heap_type = create_info.heap_type;
 
     D3D12MA::ALLOCATION_DESC alloc_desc = {
         .Flags = D3D12MA::ALLOCATION_FLAG_NONE,
@@ -73,6 +81,12 @@ Buffer* Resource_Manager::create_buffer(const Buffer_Create_Info & create_info) 
         &buffer->allocation, IID_PPV_ARGS(&buffer->resource));
 
     return buffer;
+}
+
+void Resource_Manager::destroy_gpu_resource(ID3D12Resource* resource, D3D12MA::Allocation* allocation)
+{
+    allocation->Release();
+    resource->Release();
 }
 
 }

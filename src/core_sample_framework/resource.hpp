@@ -42,17 +42,23 @@ struct Buffer_Create_Info
 
 struct Buffer : public Base_GPU_Resource
 {
-
+    uint64_t size;
+    D3D12_HEAP_TYPE heap_type;
 };
 
 struct Texture_Create_Info
 {
-
+    DXGI_FORMAT format;
+    uint32_t width;
+    uint32_t height;
+    uint16_t depth_or_array_layers;
 };
 
 struct Texture : public Base_GPU_Resource
 {
-
+    uint32_t width;
+    uint32_t height;
+    uint16_t depth_or_array_layers;
 };
 
 struct Shader : public Base_Resource
@@ -120,6 +126,9 @@ public:
     Shader* create_shader() noexcept;
     Graphics_Pipeline* create_graphics_pipeline(const Graphics_Pipeline_Create_Info& create_info) noexcept;
     Compute_Pipeline* create_compute_pipeline(Shader* shader) noexcept;
+
+private:
+    void destroy_gpu_resource(ID3D12Resource* resource, D3D12MA::Allocation* allocation);
 
 private:
     d3d12::D3D12_Context* m_d3d12_context;
