@@ -96,7 +96,7 @@ Window_Win32::~Window_Win32()
 IDXGISwapChain4* Window_Win32::create_dxgi_swapchain(d3d12::D3D12_Context* d3d12_context) noexcept
 {
     DXGI_SWAP_CHAIN_DESC1 swapchain_desc = {
-        .Format = DXGI_FORMAT_R8G8B8A8_UNORM,
+        .Format = DXGI_FORMAT_B8G8R8A8_UNORM,
         .SampleDesc = {.Count = 1, .Quality = 0 },
         .BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT,
         .BufferCount = 3, // TODO: change count?
