@@ -83,6 +83,14 @@ Buffer* Resource_Manager::create_buffer(const Buffer_Create_Info & create_info) 
     return buffer;
 }
 
+Graphics_Pipeline* Resource_Manager::create_graphics_pipeline(
+    const Graphics_Pipeline_Create_Info& create_info) noexcept
+{
+    auto* pso = &m_graphics_pipelines.emplace_back();
+
+    return pso;
+}
+
 void Resource_Manager::destroy_gpu_resource(ID3D12Resource* resource, D3D12MA::Allocation* allocation)
 {
     allocation->Release();

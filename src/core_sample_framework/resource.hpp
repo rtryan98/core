@@ -75,18 +75,17 @@ struct Base_Pipeline : public Base_Resource
 
 struct Graphics_Pipeline_Create_Info
 {
-    struct
-    {
-        Shader* vs;
-        Shader* ds;
-        Shader* hs;
-        Shader* gs;
-    } standard_stages;
-    struct
-    {
-        Shader* as;
-        Shader* ms;
-    } mesh_shading_stages;
+    Shader* vs;
+    Shader* ds;
+    Shader* hs;
+    Shader* gs;
+    Shader* ps;
+};
+
+struct Mesh_Shader_Pipeline_Create_Info
+{
+    Shader* as;
+    Shader* ms;
     Shader* ps;
 };
 

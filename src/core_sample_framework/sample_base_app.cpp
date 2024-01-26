@@ -110,7 +110,7 @@ void Sample_Application::run()
         m_current_frame += 1;
         frame_context.frame += 1;
         m_current_frame_index = m_current_frame % MAX_CONCURRENT_FRAMES;
-        frame_context.fence->Signal(frame_context.frame);
+        m_d3d12_context.direct_queue->Signal(frame_context.fence, frame_context.frame);
 
         last_time = current_time;
         current_time = std::chrono::system_clock::now();
