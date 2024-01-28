@@ -1,5 +1,6 @@
 #include "resource.hpp"
 #include "d3d12/d3d12_device.hpp"
+#include "d3d12/d3d12_pso.hpp"
 
 #include <D3D12MemAlloc.h>
 
@@ -87,7 +88,31 @@ Graphics_Pipeline* Resource_Manager::create_graphics_pipeline(
     const Graphics_Pipeline_Create_Info& create_info) noexcept
 {
     auto* pso = &m_graphics_pipelines.emplace_back();
-
+    d3d12::Graphics_Pipeline_Desc pso_desc = {
+        .root_signature = {.data = m_d3d12_context->bindless_root_signature },
+        .vs = {.data = {} },
+        .hs = {.data = {} },
+        .ds = {.data = {} },
+        .gs = {.data = {} },
+        .ps = {.data = {} },
+        .stream_output = {.data = {} },
+        .blend_state = {.data = {} },
+        .sample_mask = {.data = {} },
+        .rasterizer_state = {.data = {} },
+        .depth_stencil_state = {.data = {} },
+        .primitive_topology_type = {.data = {} },
+        .render_target_formats = {.data = {} },
+        .depth_stencil_format = {.data = {} },
+        .sample_desc = {.data = { .Count = 1, .Quality = 0 } },
+        .node_mask = {.data = 0 },
+        .cached_pso = {.data = {} },
+        .flags = {.data = D3D12_PIPELINE_STATE_FLAG_NONE }
+    };
+    D3D12_PIPELINE_STATE_STREAM_DESC stream_desc = {
+        .SizeInBytes = sizeof(pso_desc),
+        .pPipelineStateSubobjectStream = &pso_desc
+    };
+    m_d3d12_context->device->CreatePipelineState(&stream_desc, IID_PPV_ARGS(&pso->pso));
     return pso;
 }
 
