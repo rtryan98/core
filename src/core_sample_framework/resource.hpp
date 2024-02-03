@@ -64,13 +64,8 @@ struct Texture : public Base_GPU_Resource
 struct Shader : public Base_Resource
 {
     d3d12::D3D12_Shader_Workgroups workgroups;
-    D3D12_SHADER_BYTECODE bytecode;
+    std::vector<char> bytecode;
     std::string relative_path;
-};
-
-struct Base_Pipeline : public Base_Resource
-{
-    ID3D12PipelineState* pso;
 };
 
 struct Graphics_Pipeline_Create_Info
@@ -80,6 +75,13 @@ struct Graphics_Pipeline_Create_Info
     Shader* hs;
     Shader* gs;
     Shader* ps;
+    D3D12_BLEND_DESC blend_desc;
+    uint32_t sample_mask;
+    D3D12_RASTERIZER_DESC rasterizer_desc;
+    D3D12_DEPTH_STENCIL_DESC1 depth_stencil_desc;
+    D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive_topology_type;
+    D3D12_RT_FORMAT_ARRAY render_target_formats;
+    DXGI_FORMAT depth_stencil_format;
 };
 
 struct Mesh_Shader_Pipeline_Create_Info
@@ -87,6 +89,18 @@ struct Mesh_Shader_Pipeline_Create_Info
     Shader* as;
     Shader* ms;
     Shader* ps;
+    D3D12_BLEND_DESC blend_desc;
+    uint32_t sample_mask;
+    D3D12_RASTERIZER_DESC rasterizer_desc;
+    D3D12_DEPTH_STENCIL_DESC1 depth_stencil_desc;
+    D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive_topology_type;
+    D3D12_RT_FORMAT_ARRAY render_target_formats;
+    DXGI_FORMAT depth_stencil_format;
+};
+
+struct Base_Pipeline : public Base_Resource
+{
+    ID3D12PipelineState* pso;
 };
 
 struct Graphics_Pipeline : public Base_Pipeline
@@ -124,6 +138,7 @@ public:
     Texture* create_texture(const Texture_Create_Info& create_info) noexcept;
     Shader* create_shader() noexcept;
     Graphics_Pipeline* create_graphics_pipeline(const Graphics_Pipeline_Create_Info& create_info) noexcept;
+    Graphics_Pipeline* create_mesh_shader_pipeline(const Mesh_Shader_Pipeline_Create_Info& create_info) noexcept;
     Compute_Pipeline* create_compute_pipeline(Shader* shader) noexcept;
 
 private:

@@ -84,25 +84,40 @@ Buffer* Resource_Manager::create_buffer(const Buffer_Create_Info & create_info) 
     return buffer;
 }
 
+D3D12_SHADER_BYTECODE create_bytecode_ref_for_shader(Shader* shader) noexcept
+{
+    if (!shader) {
+        return D3D12_SHADER_BYTECODE {
+            .pShaderBytecode = nullptr,
+            .BytecodeLength = 0
+        };
+    }
+    return D3D12_SHADER_BYTECODE{
+        .pShaderBytecode = shader->bytecode.data(),
+        .BytecodeLength = uint32_t(shader->bytecode.size())
+    };
+}
+
 Graphics_Pipeline* Resource_Manager::create_graphics_pipeline(
     const Graphics_Pipeline_Create_Info& create_info) noexcept
 {
     auto* pso = &m_graphics_pipelines.emplace_back();
     d3d12::Graphics_Pipeline_Desc pso_desc = {
         .root_signature = {.data = m_d3d12_context->bindless_root_signature },
-        .vs = {.data = {} },
-        .hs = {.data = {} },
-        .ds = {.data = {} },
-        .gs = {.data = {} },
-        .ps = {.data = {} },
-        .stream_output = {.data = {} },
-        .blend_state = {.data = {} },
-        .sample_mask = {.data = {} },
-        .rasterizer_state = {.data = {} },
-        .depth_stencil_state = {.data = {} },
-        .primitive_topology_type = {.data = {} },
-        .render_target_formats = {.data = {} },
-        .depth_stencil_format = {.data = {} },
+        .vs = {.data = create_bytecode_ref_for_shader(create_info.vs) },
+        .hs = {.data = create_bytecode_ref_for_shader(create_info.hs) },
+        .ds = {.data = create_bytecode_ref_for_shader(create_info.ds) },
+        .gs = {.data = create_bytecode_ref_for_shader(create_info.gs) },
+        .ps = {.data = create_bytecode_ref_for_shader(create_info.ps) },
+        .stream_output = {.data = {} }, // Leave empty
+        .blend_state = {.data = create_info.blend_desc },
+        .sample_mask = {.data = create_info.sample_mask },
+        .rasterizer_state = {.data = create_info.rasterizer_desc },
+        .depth_stencil_state = {.data = create_info.depth_stencil_desc },
+        .input_layout_desc = {.data = {} }, // Leave empty
+        .primitive_topology_type = {.data = create_info.primitive_topology_type },
+        .render_target_formats = {.data = create_info.render_target_formats },
+        .depth_stencil_format = {.data = create_info.depth_stencil_format },
         .sample_desc = {.data = { .Count = 1, .Quality = 0 } },
         .node_mask = {.data = 0 },
         .cached_pso = {.data = {} },
@@ -113,6 +128,49 @@ Graphics_Pipeline* Resource_Manager::create_graphics_pipeline(
         .pPipelineStateSubobjectStream = &pso_desc
     };
     m_d3d12_context->device->CreatePipelineState(&stream_desc, IID_PPV_ARGS(&pso->pso));
+    return pso;
+}
+
+Graphics_Pipeline* Resource_Manager::create_mesh_shader_pipeline(const Mesh_Shader_Pipeline_Create_Info& create_info) noexcept
+{
+    auto* pso = &m_graphics_pipelines.emplace_back();
+    d3d12::Mesh_Shader_Pipeline_Desc pso_desc = {
+        .root_signature = {.data = m_d3d12_context->bindless_root_signature },
+        .as = {.data = create_bytecode_ref_for_shader(create_info.as) },
+        .ms = {.data = create_bytecode_ref_for_shader(create_info.ms) },
+        .ps = {.data = create_bytecode_ref_for_shader(create_info.ps) },
+        .blend_state = {.data = create_info.blend_desc },
+        .sample_mask = {.data = create_info.sample_mask },
+        .rasterizer_state = {.data = create_info.rasterizer_desc },
+        .depth_stencil_state = {.data = create_info.depth_stencil_desc },
+        .input_layout_desc = {.data = {} }, // Leave empty
+        .primitive_topology_type = {.data = create_info.primitive_topology_type },
+        .render_target_formats = {.data = create_info.render_target_formats },
+        .depth_stencil_format = {.data = create_info.depth_stencil_format },
+        .sample_desc = {.data = {.Count = 1, .Quality = 0 } },
+        .node_mask = {.data = 0 },
+        .cached_pso = {.data = {} },
+        .flags = {.data = D3D12_PIPELINE_STATE_FLAG_NONE }
+    };
+    D3D12_PIPELINE_STATE_STREAM_DESC stream_desc = {
+        .SizeInBytes = sizeof(pso_desc),
+        .pPipelineStateSubobjectStream = &pso_desc
+    };
+    m_d3d12_context->device->CreatePipelineState(&stream_desc, IID_PPV_ARGS(&pso->pso));
+    return pso;
+}
+
+Compute_Pipeline* Resource_Manager::create_compute_pipeline(Shader* shader) noexcept
+{
+    auto* pso = &m_compute_pipelines.emplace_back();
+    D3D12_COMPUTE_PIPELINE_STATE_DESC pso_desc = {
+        .pRootSignature = m_d3d12_context->bindless_root_signature,
+        .CS = create_bytecode_ref_for_shader(shader),
+        .NodeMask = 0,
+        .CachedPSO = {},
+        .Flags = D3D12_PIPELINE_STATE_FLAG_NONE
+    };
+    m_d3d12_context->device->CreateComputePipelineState(&pso_desc, IID_PPV_ARGS(&pso->pso));
     return pso;
 }
 
