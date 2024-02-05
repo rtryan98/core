@@ -71,8 +71,8 @@ struct Shader : public Base_Resource
 struct Graphics_Pipeline_Create_Info
 {
     Shader* vs;
-    Shader* ds;
     Shader* hs;
+    Shader* ds;
     Shader* gs;
     Shader* ps;
     D3D12_BLEND_DESC blend_desc;
@@ -103,15 +103,31 @@ struct Base_Pipeline : public Base_Resource
     ID3D12PipelineState* pso;
 };
 
+enum class Graphics_Pipeline_Type
+{
+    VERTEX_SHADING,
+    MESH_SHADING
+};
+
 struct Graphics_Pipeline : public Base_Pipeline
 {
+    Graphics_Pipeline_Type type;
+
     Shader* vs;
-    Shader* ds;
     Shader* hs;
+    Shader* ds;
     Shader* gs;
     Shader* as;
     Shader* ms;
     Shader* ps;
+
+    D3D12_BLEND_DESC blend_desc;
+    uint32_t sample_mask;
+    D3D12_RASTERIZER_DESC rasterizer_desc;
+    D3D12_DEPTH_STENCIL_DESC1 depth_stencil_desc;
+    D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive_topology_type;
+    D3D12_RT_FORMAT_ARRAY render_target_formats;
+    DXGI_FORMAT depth_stencil_format;
 };
 
 struct Compute_Pipeline : public Base_Pipeline

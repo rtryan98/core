@@ -127,7 +127,23 @@ Graphics_Pipeline* Resource_Manager::create_graphics_pipeline(
         .SizeInBytes = sizeof(pso_desc),
         .pPipelineStateSubobjectStream = &pso_desc
     };
+    *pso = {
+        .type = Graphics_Pipeline_Type::VERTEX_SHADING,
+        .vs = create_info.vs,
+        .hs = create_info.hs,
+        .ds = create_info.ds,
+        .gs = create_info.gs,
+        .ps = create_info.ps,
+        .blend_desc = create_info.blend_desc,
+        .sample_mask = create_info.sample_mask,
+        .rasterizer_desc = create_info.rasterizer_desc,
+        .depth_stencil_desc = create_info.depth_stencil_desc,
+        .primitive_topology_type = create_info.primitive_topology_type,
+        .render_target_formats = create_info.render_target_formats,
+        .depth_stencil_format = create_info.depth_stencil_format
+    };
     m_d3d12_context->device->CreatePipelineState(&stream_desc, IID_PPV_ARGS(&pso->pso));
+    pso->alive = true;
     return pso;
 }
 
@@ -156,7 +172,21 @@ Graphics_Pipeline* Resource_Manager::create_mesh_shader_pipeline(const Mesh_Shad
         .SizeInBytes = sizeof(pso_desc),
         .pPipelineStateSubobjectStream = &pso_desc
     };
+    *pso = {
+        .type = Graphics_Pipeline_Type::MESH_SHADING,
+        .as = create_info.as,
+        .ms = create_info.ms,
+        .ps = create_info.ps,
+        .blend_desc = create_info.blend_desc,
+        .sample_mask = create_info.sample_mask,
+        .rasterizer_desc = create_info.rasterizer_desc,
+        .depth_stencil_desc = create_info.depth_stencil_desc,
+        .primitive_topology_type = create_info.primitive_topology_type,
+        .render_target_formats = create_info.render_target_formats,
+        .depth_stencil_format = create_info.depth_stencil_format
+    };
     m_d3d12_context->device->CreatePipelineState(&stream_desc, IID_PPV_ARGS(&pso->pso));
+    pso->alive = true;
     return pso;
 }
 
