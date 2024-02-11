@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+#include "bindless_descriptor_allocator.hpp"
+
 namespace D3D12MA
 {
 class Allocation;
@@ -28,8 +30,6 @@ struct Base_GPU_Resource : public Base_Resource
 {
     uint32_t bindless_index;
     DXGI_FORMAT format;
-    D3D12_CPU_DESCRIPTOR_HANDLE cpu_descriptor;
-    D3D12_GPU_DESCRIPTOR_HANDLE gpu_descriptor;
     D3D12MA::Allocation* allocation;
     ID3D12Resource2* resource;
 };
@@ -52,6 +52,12 @@ struct Texture_Create_Info
     uint32_t width;
     uint32_t height;
     uint16_t depth_or_array_layers;
+    uint16_t mip_levels;
+    D3D12_CLEAR_VALUE optimized_clear_value; // Leave Format as DXGI_FORMAT_UNKNOWN for no clear value.
+    D3D12_SRV_DIMENSION srv_dimension;
+    D3D12_UAV_DIMENSION uav_dimension;
+    D3D12_RTV_DIMENSION rtv_dimension;
+    D3D12_DSV_DIMENSION dsv_dimension;
 };
 
 struct Texture : public Base_GPU_Resource
@@ -59,6 +65,12 @@ struct Texture : public Base_GPU_Resource
     uint32_t width;
     uint32_t height;
     uint16_t depth_or_array_layers;
+    uint32_t rtv_index;
+    uint32_t dsv_index;
+    D3D12_GPU_DESCRIPTOR_HANDLE srv_descriptor; // Store duplicate information for imgui
+    D3D12_GPU_DESCRIPTOR_HANDLE uav_descriptor;
+    D3D12_CPU_DESCRIPTOR_HANDLE rtv_descriptor; // Store for convenience, could be derived from index
+    D3D12_CPU_DESCRIPTOR_HANDLE dsv_descriptor; // ^
 };
 
 struct Shader : public Base_Resource
@@ -173,6 +185,7 @@ private:
     std::vector<Compute_Pipeline> m_compute_pipelines;
 
     D3D12MA::Allocator* m_allocator;
+    Bindless_Descriptor_Allocator m_descriptor_index_allocator;
 };
 
 }

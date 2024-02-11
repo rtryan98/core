@@ -1,6 +1,7 @@
 #include "resource.hpp"
 #include "d3d12/d3d12_device.hpp"
 #include "d3d12/d3d12_pso.hpp"
+#include "d3d12/d3d12_descriptor_util.hpp"
 
 #include <D3D12MemAlloc.h>
 
@@ -16,6 +17,11 @@ Resource_Manager::Resource_Manager(const Resource_Manager_Create_Info& create_in
     , m_graphics_pipelines()
     , m_compute_pipelines()
     , m_allocator(nullptr)
+    , m_descriptor_index_allocator({
+        D3D12_MAX_SHADER_VISIBLE_DESCRIPTOR_HEAP_SIZE_TIER_2,
+        D3D12_MAX_SHADER_VISIBLE_SAMPLER_HEAP_SIZE,
+        1024,
+        1024}) // TODO: pass the rtv and dsv descriptor count
 {
     m_buffers.reserve(create_info.max_buffer_count);
     m_textures.reserve(create_info.max_texture_count);
@@ -53,7 +59,6 @@ Resource_Manager::~Resource_Manager()
 Buffer* Resource_Manager::create_buffer(const Buffer_Create_Info & create_info) noexcept
 {
     auto* buffer =  &m_buffers.emplace_back();
-    buffer->alive = true;
     buffer->size = create_info.size;
     buffer->heap_type = create_info.heap_type;
 
@@ -74,14 +79,128 @@ Buffer* Resource_Manager::create_buffer(const Buffer_Create_Info & create_info) 
         .Format = DXGI_FORMAT_UNKNOWN,
         .SampleDesc = { .Count = 1, .Quality = 0 },
         .Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR,
-        .Flags = D3D12_RESOURCE_FLAG_NONE,
+        .Flags = D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS,
         .SamplerFeedbackMipRegion = {}
     };
     m_allocator->CreateResource3(&alloc_desc, &resource_desc,
         D3D12_BARRIER_LAYOUT_UNDEFINED, nullptr, 0, nullptr,
         &buffer->allocation, IID_PPV_ARGS(&buffer->resource));
 
+    auto srv_descriptor_index = m_descriptor_index_allocator.acquire_resource_descriptor_index();
+    auto uav_descriptor_index = srv_descriptor_index + 1;
+    buffer->bindless_index = srv_descriptor_index;
+    auto descriptor_increment = m_d3d12_context->device->GetDescriptorHandleIncrementSize(
+        D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    auto cpu_descriptor_handle = m_d3d12_context->resource_descriptor_heap->GetCPUDescriptorHandleForHeapStart();
+    cpu_descriptor_handle.ptr += uint64_t(srv_descriptor_index) * descriptor_increment;
+
+    D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = d3d12::make_raw_buffer_srv(uint32_t(create_info.size));
+    m_d3d12_context->device->CreateShaderResourceView(buffer->resource, &srv_desc, cpu_descriptor_handle);
+
+    // TODO: always allow unordered access?
+    D3D12_UNORDERED_ACCESS_VIEW_DESC uav_desc = d3d12::make_raw_buffer_uav(uint32_t(create_info.size));
+    cpu_descriptor_handle.ptr += descriptor_increment;
+    m_d3d12_context->device->CreateUnorderedAccessView(buffer->resource, nullptr, &uav_desc, cpu_descriptor_handle);
+
+    buffer->alive = true;
     return buffer;
+}
+
+Texture* Resource_Manager::create_texture(const Texture_Create_Info& create_info) noexcept
+{
+    auto* texture = &m_textures.emplace_back();
+
+    D3D12MA::ALLOCATION_DESC alloc_desc = {
+        .Flags = D3D12MA::ALLOCATION_FLAG_NONE,
+        .HeapType = D3D12_HEAP_TYPE_DEFAULT,
+        .ExtraHeapFlags = D3D12_HEAP_FLAG_NONE,
+        .CustomPool = nullptr,
+        .pPrivateData = nullptr
+    };
+    uint32_t resource_flags = D3D12_RESOURCE_FLAG_NONE;
+    resource_flags |= (create_info.uav_dimension != D3D12_UAV_DIMENSION_UNKNOWN)
+        ? D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS
+        : D3D12_RESOURCE_FLAG_NONE;
+    resource_flags |= (create_info.rtv_dimension != D3D12_RTV_DIMENSION_UNKNOWN)
+        ? D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET
+        : D3D12_RESOURCE_FLAG_NONE;
+    resource_flags |= (create_info.dsv_dimension != D3D12_DSV_DIMENSION_UNKNOWN)
+        ? D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL
+        : D3D12_RESOURCE_FLAG_NONE;
+    D3D12_RESOURCE_DESC1 resource_desc = {
+        .Dimension = D3D12_RESOURCE_DIMENSION_BUFFER,
+        .Alignment = 0ull,
+        .Width = create_info.width,
+        .Height = create_info.height,
+        .DepthOrArraySize = create_info.depth_or_array_layers,
+        .MipLevels = create_info.mip_levels,
+        .Format = create_info.format,
+        .SampleDesc = {.Count = 1, .Quality = 0 },
+        .Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN,
+        .Flags = D3D12_RESOURCE_FLAGS(resource_flags),
+        .SamplerFeedbackMipRegion = {}
+    };
+    bool has_clear_value = create_info.optimized_clear_value.Format != DXGI_FORMAT_UNKNOWN;
+    m_allocator->CreateResource3(
+        &alloc_desc,
+        &resource_desc,
+        D3D12_BARRIER_LAYOUT_UNDEFINED,
+        has_clear_value ? &create_info.optimized_clear_value : nullptr,
+        0,
+        nullptr,
+        &texture->allocation,
+        IID_PPV_ARGS(&texture->resource));
+
+    auto srv_descriptor_index = m_descriptor_index_allocator.acquire_resource_descriptor_index();
+    auto uav_descriptor_index = srv_descriptor_index + 1;
+    texture->bindless_index = srv_descriptor_index;
+    auto srv_uav_descriptor_increment = m_d3d12_context->device->GetDescriptorHandleIncrementSize(
+        D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    auto srv_uav_cpu_descriptor_handle = m_d3d12_context->resource_descriptor_heap->GetCPUDescriptorHandleForHeapStart();
+    srv_uav_cpu_descriptor_handle.ptr += uint64_t(srv_descriptor_index) * srv_uav_descriptor_increment;
+
+    D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = d3d12::make_full_texture_srv(
+        create_info.format, create_info.srv_dimension, create_info.depth_or_array_layers);
+    m_d3d12_context->device->CreateShaderResourceView(
+        texture->resource, &srv_desc, srv_uav_cpu_descriptor_handle);
+
+    if (create_info.uav_dimension != D3D12_UAV_DIMENSION_UNKNOWN)
+    {
+        D3D12_UNORDERED_ACCESS_VIEW_DESC uav_desc = d3d12::make_full_texture_uav(
+            create_info.format, create_info.uav_dimension, create_info.depth_or_array_layers, 0, 0);
+        srv_uav_cpu_descriptor_handle.ptr += srv_uav_descriptor_increment;
+        m_d3d12_context->device->CreateUnorderedAccessView(
+            texture->resource, nullptr, &uav_desc, srv_uav_cpu_descriptor_handle);
+    }
+
+    if (create_info.rtv_dimension != D3D12_RTV_DIMENSION_UNKNOWN)
+    {
+        auto rtv_descriptor_index = m_descriptor_index_allocator.acquire_render_target_view_descriptor_index();
+        auto rtv_descriptor_increment = m_d3d12_context->device->GetDescriptorHandleIncrementSize(
+            D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+        auto rtv_descriptor_handle = m_d3d12_context->rtv_descriptor_heap->GetCPUDescriptorHandleForHeapStart();
+        rtv_descriptor_handle.ptr += uint64_t(rtv_descriptor_index) * rtv_descriptor_increment;
+        D3D12_RENDER_TARGET_VIEW_DESC rtv_desc = d3d12::make_full_texture_rtv(
+            create_info.format, create_info.rtv_dimension, create_info.depth_or_array_layers, 0, 0);
+        m_d3d12_context->device->CreateRenderTargetView(
+            texture->resource, &rtv_desc, rtv_descriptor_handle);
+    }
+
+    if (create_info.dsv_dimension != D3D12_DSV_DIMENSION_UNKNOWN)
+    {
+        auto dsv_descriptor_index = m_descriptor_index_allocator.acquire_depth_stencil_view_descriptor_index();
+        auto dsv_descriptor_increment = m_d3d12_context->device->GetDescriptorHandleIncrementSize(
+            D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+        auto dsv_descriptor_handle = m_d3d12_context->dsv_descriptor_heap->GetCPUDescriptorHandleForHeapStart();
+        dsv_descriptor_handle.ptr += uint64_t(dsv_descriptor_index) * dsv_descriptor_increment;
+        D3D12_DEPTH_STENCIL_VIEW_DESC dsv_desc = d3d12::make_full_texture_dsv(
+            create_info.format, create_info.dsv_dimension, create_info.depth_or_array_layers, 0);
+        m_d3d12_context->device->CreateDepthStencilView(
+            texture->resource, &dsv_desc, dsv_descriptor_handle);
+    }
+
+    texture->alive = true;
+    return texture;
 }
 
 D3D12_SHADER_BYTECODE create_bytecode_ref_for_shader(Shader* shader) noexcept
@@ -200,7 +319,11 @@ Compute_Pipeline* Resource_Manager::create_compute_pipeline(Shader* shader) noex
         .CachedPSO = {},
         .Flags = D3D12_PIPELINE_STATE_FLAG_NONE
     };
+    *pso = {
+        .cs = shader
+    };
     m_d3d12_context->device->CreateComputePipelineState(&pso_desc, IID_PPV_ARGS(&pso->pso));
+    pso->alive = true;
     return pso;
 }
 
