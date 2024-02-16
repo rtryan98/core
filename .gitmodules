@@ -1,3 +1,6 @@
 [submodule "thirdparty/D3D12MemoryAllocator"]
 	path = thirdparty/D3D12MemoryAllocator
 	url = https://github.com/GPUOpen-LibrariesAndSDKs/D3D12MemoryAllocator
+[submodule "thirdparty/nlohmann_json"]
+	path = thirdparty/nlohmann_json
+	url = https://github.com/nlohmann/json

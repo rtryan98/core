@@ -60,6 +60,7 @@ add_library(
 target_link_libraries(
     ${CORE_SF_LIBRARY_NAME} PUBLIC
     ${CORE_LIBRARY_NAME}
+    nlohmann_json::nlohmann_json
 )
 target_include_directories(
     ${CORE_SF_LIBRARY_NAME} PUBLIC
@@ -71,3 +72,6 @@ set_target_properties(
 )
 
 add_subdirectory(src)
+
+core_add_shader_include_path("${CMAKE_CURRENT_LIST_DIR}/shaders/hlsl/")
+core_generate_shader_include_path_json_string()

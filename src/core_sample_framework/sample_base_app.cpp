@@ -2,6 +2,8 @@
 #include "window_win32_default.hpp"
 
 #include <chrono>
+#include <fstream>
+#include <nlohmann/json.hpp>
 
 namespace core::sf
 {
@@ -44,6 +46,8 @@ Sample_Application::Sample_Application(const Sample_Application_Create_Info& cre
         }
         frame_context.frame = 0ull;
     }
+
+    init_shader_compiler();
 }
 
 Sample_Application::~Sample_Application()
@@ -119,6 +123,22 @@ void Sample_Application::run()
 
 void Sample_Application::render_gui(ID3D12GraphicsCommandList7* cmd) noexcept
 {
+}
+
+void Sample_Application::init_shader_compiler()
+{
+    std::vector<std::string> paths;
+    std::ifstream shader_include_paths_file("shader_includes.json");
+    if (shader_include_paths_file.fail())
+    {
+        return; // Necessary check?
+    }
+    nlohmann::json shader_include_paths_json = nlohmann::json::parse(shader_include_paths_file);
+    for (const auto& element : shader_include_paths_json)
+    {
+        paths.push_back(element["path"]);
+    }
+
 }
 
 }

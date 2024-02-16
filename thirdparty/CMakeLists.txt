@@ -1,1 +1,2 @@
 add_subdirectory(D3D12MemoryAllocator)
+add_subdirectory(nlohmann_json)

@@ -34,6 +34,9 @@ public:
 protected:
     void render_gui(ID3D12GraphicsCommandList7* cmd) noexcept;
 
+private:
+    void init_shader_compiler();
+
 protected:
     std::unique_ptr<Window> m_window;
     d3d12::D3D12_Context m_d3d12_context;
