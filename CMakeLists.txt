@@ -11,9 +11,6 @@ project(
     LANGUAGES CXX
 )
 
-set(D3D12MA_AGILITY_SDK_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/thirdparty/d3d12_agility_sdk CACHE STRING "Agility SDK Path for D3D12MA." FORCE)
-add_subdirectory(thirdparty)
-
 if(NOT DEFINED CORE_D3D12_AGILITY_SDK_VERSION)
     set(CORE_D3D12_AGILITY_SDK_VERSION 611)
 endif()
@@ -34,6 +31,9 @@ core_download_and_extract_zip(
     ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty
     d3d12_agility_sdk
 )
+
+set(D3D12MA_AGILITY_SDK_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/thirdparty/d3d12_agility_sdk CACHE STRING "Agility SDK Path for D3D12MA." FORCE)
+add_subdirectory(thirdparty)
 
 add_library(
     ${CORE_LIBRARY_NAME}
