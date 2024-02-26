@@ -1,4 +1,4 @@
-#include "d3d12/d3d12_descriptor_util.hpp"
+#include "core/d3d12/d3d12_descriptor_util.hpp"
 
 namespace core::d3d12
 {

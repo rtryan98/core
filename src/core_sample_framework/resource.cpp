@@ -1,8 +1,9 @@
 #include "resource.hpp"
-#include "d3d12/d3d12_device.hpp"
-#include "d3d12/d3d12_pso.hpp"
-#include "d3d12/d3d12_descriptor_util.hpp"
 
+#include <core/d3d12/d3d12_device.hpp>
+#include <core/d3d12/d3d12_pso.hpp>
+#include <core/d3d12/d3d12_descriptor_util.hpp>
+#define D3D12MA_D3D12_HEADERS_ALREADY_INCLUDED
 #include <D3D12MemAlloc.h>
 
 namespace core::sf

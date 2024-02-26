@@ -1,10 +1,10 @@
 #pragma once
 
-#include "d3d12/d3d12_device.hpp"
 #include "resource.hpp"
 #include "swapchain.hpp"
 #include "window.hpp"
 
+#include <core/d3d12/d3d12_device.hpp>
 #include <memory>
 
 namespace core::sf

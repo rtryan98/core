@@ -1,8 +1,8 @@
 #pragma once
 
 #include <cstdint>
-#include <d3d12.h>
-#include <d3d12/d3d12_shader.hpp>
+#include <agility_sdk/d3d12.h>
+#include <core/d3d12/d3d12_shader.hpp>
 #include <string>
 #include <vector>
 
