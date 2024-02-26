@@ -31,6 +31,8 @@ core_download_and_extract_zip(
     ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty
     d3d12_agility_sdk
 )
+set(AGILITY_SDK_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/d3d12_agility_sdk/include)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/d3d12_agility_sdk/build/native/include/ DESTINATION ${AGILITY_SDK_INCLUDE_DIR}/agility_sdk/)
 
 set(D3D12MA_AGILITY_SDK_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/thirdparty/d3d12_agility_sdk CACHE STRING "Agility SDK Path for D3D12MA." FORCE)
 add_subdirectory(thirdparty)
@@ -47,7 +49,7 @@ target_link_libraries(
 target_include_directories(
     ${CORE_LIBRARY_NAME} PUBLIC
     src/core
-    thirdparty/d3d12_agility_sdk/build/native/include
+    ${AGILITY_SDK_INCLUDE_DIR}
 )
 set_target_properties(
     ${CORE_LIBRARY_NAME} PROPERTIES
