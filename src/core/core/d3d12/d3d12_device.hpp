@@ -59,6 +59,7 @@ struct D3D12_Context_Create_Info
     uint32_t sampler_descriptor_heap_size;
     uint32_t rtv_descriptor_heap_size;
     uint32_t dsv_descriptor_heap_size;
+    uint32_t push_constant_size;
     std::span<D3D12_STATIC_SAMPLER_DESC> static_samplers;
 };
 

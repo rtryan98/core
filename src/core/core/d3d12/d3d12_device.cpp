@@ -146,11 +146,20 @@ HRESULT create_d3d12_context(const D3D12_Context_Create_Info& create_info, D3D12
         return result;
     }
 
+    D3D12_ROOT_PARAMETER1 push_constants_root_para = {
+        .ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS,
+        .Constants = {
+            .ShaderRegister = 0,
+            .RegisterSpace = 0,
+            .Num32BitValues = create_info.push_constant_size >> 2
+        },
+        .ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL
+    };
     D3D12_VERSIONED_ROOT_SIGNATURE_DESC versioned_root_signature_desc = {
         .Version = D3D_ROOT_SIGNATURE_VERSION_1_1,
         .Desc_1_1 = {
-            .NumParameters = 0,
-            .pParameters = nullptr,
+            .NumParameters = 1,
+            .pParameters = &push_constants_root_para,
             .NumStaticSamplers = uint32_t(create_info.static_samplers.size()),
             .pStaticSamplers = create_info.static_samplers.data(),
             .Flags = D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED
