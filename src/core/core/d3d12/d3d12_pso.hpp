@@ -103,7 +103,7 @@ struct Graphics_Pipeline_Desc
     Pipeline_Stream_Object_Blend_Desc blend_state;
     Pipeline_Stream_Object_Sample_Mask sample_mask;
     Pipeline_Stream_Object_Rasterizer_Desc1 rasterizer_state;
-    Pipeline_Stream_Object_Depth_Stencil_Desc1 depth_stencil_state;
+    Pipeline_Stream_Object_Depth_Stencil_Desc2 depth_stencil_state;
     Pipeline_Stream_Object_Input_Layout_Desc input_layout_desc;
     Pipeline_Stream_Object_Primitive_Topology_Type primitive_topology_type;
     Pipeline_Stream_Object_Render_Target_Formats render_target_formats;
@@ -122,8 +122,8 @@ struct Mesh_Shader_Pipeline_Desc
     Pipeline_Stream_Object_Pixel_Shader ps;
     Pipeline_Stream_Object_Blend_Desc blend_state;
     Pipeline_Stream_Object_Sample_Mask sample_mask;
-    Pipeline_Stream_Object_Rasterizer_Desc rasterizer_state;
-    Pipeline_Stream_Object_Depth_Stencil_Desc1 depth_stencil_state;
+    Pipeline_Stream_Object_Rasterizer_Desc1 rasterizer_state;
+    Pipeline_Stream_Object_Depth_Stencil_Desc2 depth_stencil_state;
     Pipeline_Stream_Object_Input_Layout_Desc input_layout_desc;
     Pipeline_Stream_Object_Primitive_Topology_Type primitive_topology_type;
     Pipeline_Stream_Object_Render_Target_Formats render_target_formats;
