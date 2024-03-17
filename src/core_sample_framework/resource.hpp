@@ -89,8 +89,8 @@ struct Graphics_Pipeline_Create_Info
     Shader* ps;
     D3D12_BLEND_DESC blend_desc;
     uint32_t sample_mask;
-    D3D12_RASTERIZER_DESC rasterizer_desc;
-    D3D12_DEPTH_STENCIL_DESC1 depth_stencil_desc;
+    D3D12_RASTERIZER_DESC1 rasterizer_desc;
+    D3D12_DEPTH_STENCIL_DESC2 depth_stencil_desc;
     D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive_topology_type;
     D3D12_RT_FORMAT_ARRAY render_target_formats;
     DXGI_FORMAT depth_stencil_format;
@@ -103,8 +103,8 @@ struct Mesh_Shader_Pipeline_Create_Info
     Shader* ps;
     D3D12_BLEND_DESC blend_desc;
     uint32_t sample_mask;
-    D3D12_RASTERIZER_DESC rasterizer_desc;
-    D3D12_DEPTH_STENCIL_DESC1 depth_stencil_desc;
+    D3D12_RASTERIZER_DESC1 rasterizer_desc;
+    D3D12_DEPTH_STENCIL_DESC2 depth_stencil_desc;
     D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive_topology_type;
     D3D12_RT_FORMAT_ARRAY render_target_formats;
     DXGI_FORMAT depth_stencil_format;
@@ -135,8 +135,8 @@ struct Graphics_Pipeline : public Base_Pipeline
 
     D3D12_BLEND_DESC blend_desc;
     uint32_t sample_mask;
-    D3D12_RASTERIZER_DESC rasterizer_desc;
-    D3D12_DEPTH_STENCIL_DESC1 depth_stencil_desc;
+    D3D12_RASTERIZER_DESC1 rasterizer_desc;
+    D3D12_DEPTH_STENCIL_DESC2 depth_stencil_desc;
     D3D12_PRIMITIVE_TOPOLOGY_TYPE primitive_topology_type;
     D3D12_RT_FORMAT_ARRAY render_target_formats;
     DXGI_FORMAT depth_stencil_format;
