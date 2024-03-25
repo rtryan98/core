@@ -223,7 +223,7 @@ D3D12_RENDER_TARGET_VIEW_DESC make_full_texture_rtv(
     return make_texture_rtv(format, rtv_dimension, 0, depth_or_array_layers, mip_slice, plane_slice);
 }
 
-D3D12_RENDER_TARGET_VIEW_DESC make_full_texture_rtv(
+D3D12_RENDER_TARGET_VIEW_DESC make_texture_rtv(
     DXGI_FORMAT format,
     D3D12_RTV_DIMENSION rtv_dimension,
     uint32_t first_array_index,
