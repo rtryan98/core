@@ -195,9 +195,15 @@ HRESULT destroy_d3d12_context(D3D12_Context* context)
     context->copy_queue->Release();
     context->compute_queue->Release();
     context->direct_queue->Release();
+    ID3D12DebugDevice* debug_device;
+    bool has_debug_device = SUCCEEDED(context->device->QueryInterface(IID_PPV_ARGS(&debug_device)));
     context->device->Release();
     context->adapter->Release();
     context->factory->Release();
+    if (has_debug_device)
+    {
+        debug_device->ReportLiveDeviceObjects(D3D12_RLDO_DETAIL | D3D12_RLDO_IGNORE_INTERNAL);
+    }
     return S_OK;
 }
 
