@@ -6,6 +6,4 @@ target_sources(
     d3d12_device.hpp
     d3d12_shader.cpp
     d3d12_shader.hpp
-    d3d12_pso.cpp
-    d3d12_pso.hpp
 )
