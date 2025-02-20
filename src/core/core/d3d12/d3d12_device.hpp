@@ -81,8 +81,4 @@ struct D3D12_Context
 
 HRESULT create_d3d12_context(const D3D12_Context_Create_Info& create_info, D3D12_Context* context);
 HRESULT destroy_d3d12_context(D3D12_Context* context);
-
-DWORD await_fence(ID3D12Fence* fence, uint64_t val, uint64_t timeout);
-DWORD await_queue(ID3D12Device* device, ID3D12CommandQueue* queue, uint64_t timeout);
-DWORD await_context(D3D12_Context* context);
 }

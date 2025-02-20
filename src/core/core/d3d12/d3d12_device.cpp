@@ -206,46 +206,4 @@ HRESULT destroy_d3d12_context(D3D12_Context* context)
     }
     return S_OK;
 }
-
-DWORD await_fence(ID3D12Fence* fence, uint64_t val, uint64_t timeout)
-{
-    DWORD result = WAIT_FAILED;
-    if (fence->GetCompletedValue() < val)
-    {
-        HANDLE event_handle = CreateEvent(NULL, FALSE, FALSE, NULL);
-        fence->SetEventOnCompletion(val, event_handle);
-        if (event_handle != 0)
-        {
-            result = WaitForSingleObject(event_handle, timeout);
-            CloseHandle(event_handle);
-        }
-    }
-    else
-    {
-        result = WAIT_OBJECT_0;
-    }
-    return result;
-}
-
-DWORD await_queue(ID3D12Device* device, ID3D12CommandQueue* queue, uint64_t timeout)
-{
-    ID3D12Fence1* fence;
-    device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
-    if (!fence)
-    {
-        return WAIT_FAILED;
-    }
-    queue->Signal(fence, 1);
-    auto result = await_fence(fence, 1, timeout);
-    fence->Release();
-    return result;
-}
-
-DWORD await_context(D3D12_Context* context)
-{
-    if (auto result = await_queue(context->device, context->direct_queue,  INFINITE)) return result;
-    if (auto result = await_queue(context->device, context->compute_queue, INFINITE)) return result;
-    if (auto result = await_queue(context->device, context->copy_queue,    INFINITE)) return result;
-    return WAIT_OBJECT_0;
-}
 }
